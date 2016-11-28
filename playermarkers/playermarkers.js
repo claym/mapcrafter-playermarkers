@@ -16,10 +16,10 @@
 */
 
 var INTERVAL = 5 * 1000;
-var ANIMATED = true;
+var ANIMATED = false;
 
-var JSON_PATH = "/path/to/players.json";
-var IMG_PATH = "/path/to/player.php?username={username}";
+var JSON_PATH = "playermarkers/players.json";
+var IMG_PATH = "https://overviewer.org/avatar/{username}";
 var IMG_SIZE_FACTOR = 1.0;
 
 function PlayerMarker(ui, username, world, pos) {
@@ -150,21 +150,22 @@ MapPlayerMarkerHandler.prototype.updatePlayers = function(data) {
 
 	var globalPlayersOnline = [];
 	var worldPlayersOnline = 0;
-	for(var i = 0; i < data["players"].length; i++) {
-		var user = data["players"][i];
-		var username = user.username;
-		var pos = {x: user.x, z: user.z, y: user.y};
+	var players = Object.getOwnPropertyNames(data);
+	for(var i = 0; i < players.length; i++) {
+		var user = data[players[i]];
+		var username = user.name;
+		var pos = {x: user.Pos[0], z: user.Pos[2], y: user.Pos[1]};
 
 		var player;
 
-		if(user.username in this.players) {
+		if(username in this.players) {
 			player = this.players[username];
 		} else {
-			player = new PlayerMarker(ui, username, user.world, pos);
+			player = new PlayerMarker(ui, username, user.SpawnWorld, pos);
 			this.players[username] = player;
 		}
 		
-		player.setActive(user.world == this.currentWorld);
+		player.setActive(user.SpawnWorld == this.currentWorld);
 
 		if(player.active) {
 			worldPlayersOnline++;
